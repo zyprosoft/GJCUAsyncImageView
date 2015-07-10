@@ -243,6 +243,7 @@
         self.cachePath = [self imageUrlToDefaultCachePath:self.url];
     }
     GJCFFileDownloadTask *downloadTask = [self createTaskForUrl:self.url forCachePath:self.cachePath];
+    downloadTask.groupTaskIdentifier = self.groupDownloadTaskIdentifier;
     [[GJCFFileDownloadManager shareDownloadManager]addTask:downloadTask];
     
     /* indicator */
