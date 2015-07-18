@@ -10,6 +10,9 @@
 #import "AFHTTPRequestOperationManager.h"
 #import "AFHTTPRequestOperation.h"
 #import "GJCFUitils.h"
+#import "ZYNetWorkManager.h"
+#import "ZYNetWorkTask.h"
+#import "ZYNetWorkConst.h"
 
 static NSString * kGJCFFileDownloadManagerCompletionBlockKey = @"kGJCFFileUploadManagerCompletionBlockKey";
 
@@ -19,9 +22,6 @@ static NSString * kGJCFFileDownloadManagerFaildBlockKey = @"kGJCFFileUploadManag
 
 static NSString * kGJCFFileDownloadManagerObserverUniqueIdentifier = @"kGJCFFileDownloadManagerObserverUniqueIdentifier";
 
-static NSString * kGJCFFileDownloadManagerQueue = @"com.gjcf.download.queue";
-
-static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
 
 @interface GJCFFileDownloadManager ()
 
@@ -29,9 +29,7 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
 
 @property (nonatomic,strong)NSMutableDictionary *taskOberverAction;
 
-@property (nonatomic,strong)NSString *defaultHost;
-
-@property (nonatomic,strong)AFHTTPRequestOperationManager *requestOperationManager;
+@property (nonatomic,strong)NSString *innerDefaultHost;
 
 @end
 
@@ -56,8 +54,8 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
         
         self.taskArray = [[NSMutableArray alloc]init];
         self.taskOberverAction = [[NSMutableDictionary alloc]init];
-        _gjcfFileDownloadManagerOperationQueue = dispatch_queue_create(kGJCFFileDownloadManagerQueue.UTF8String, NULL);
-        self.requestOperationManager = [[AFHTTPRequestOperationManager alloc]initWithBaseURL:[NSURL URLWithString:@"http://www.zyprosoft.com"]];
+
+        
     }
     return self;
 }
@@ -74,17 +72,11 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
 /* 设置默认主机地址 */
 - (void)setDefaultDownloadHost:(NSString *)host
 {
-    if ([self.defaultHost isEqualToString:host]) {
+    if ([_innerDefaultHost isEqualToString:host]) {
         return;
     }
-    self.defaultHost = host;
-    
-    if (self.requestOperationManager) {
-        self.requestOperationManager = nil;
-    }
-    
-    self.requestOperationManager = [[AFHTTPRequestOperationManager alloc]init];
-
+    _innerDefaultHost = nil;
+    _innerDefaultHost = [host copy];
 }
 
 - (void)addTask:(GJCFFileDownloadTask *)task
@@ -100,129 +92,56 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
         return;
     }
     
-    dispatch_async(_gjcfFileDownloadManagerOperationQueue, ^{
-       
-        /* 判断下载地址是否有主机地址，如果没有的话，给补全，我们默认没有找到http://就给它补全 */
-        if (task.useDowloadManagerHost) {
+    //使用新的网络组件
+    ZYNetWorkTask *netWorkTask = [[ZYNetWorkTask alloc]init];
+    netWorkTask.downloadUrl = task.downloadUrl;
+    netWorkTask.groupTaskIdentifier = task.groupTaskIdentifier;
+    netWorkTask.requestMethod = ZYNetworkRequestMethodGET;
+    netWorkTask.taskType = ZYNetworkTaskTypeDownloadFile;
+    
+    /* 如果有相同的下载任务就不添加进入队列 */
+    for (GJCFFileDownloadTask *dTask in self.taskArray) {
+        
+        if ([task isEqualToTask:dTask]) {
             
-            /* 如果当前没有设置下载主机地址，那么可以直接退出了 */
-            if (self.defaultHost == nil) {
-                return;
-            }
-            
-            /* 主机地址最后一位是不是 '/' */
-            unichar lastHostChar = [self.defaultHost characterAtIndex:self.defaultHost.length-1];
-            NSString *lastHostString = [NSString stringWithFormat:@"%c",lastHostChar];
-            
-            unichar firstDownloadUrlChar = [task.downloadUrl characterAtIndex:0];
-            NSString *firstDownloadUrlString = [NSString stringWithFormat:@"%c",firstDownloadUrlChar];
-            
-            /* 如果会产生 // 情况，我们要干掉这个情况 */
-            if ([lastHostString isEqualToString:@"/"] && [firstDownloadUrlString isEqualToString:lastHostString]) {
-                
-                task.downloadUrl = [NSString stringWithFormat:@"%@%@",self.defaultHost,[task.downloadUrl substringToIndex:1]];
-            }
-            
-        }else{
-            
-            if (![task.downloadUrl hasPrefix:@"http://"] && ![task.downloadUrl hasPrefix:@"https://"] && ![task.downloadUrl hasPrefix:@"ftp://"]) {
-                task.downloadUrl = [NSString stringWithFormat:@"http://%@",task.downloadUrl];
-            }
+            /* 将这个任务的所有观察者添加到存在的任务的观察者中 */
+            for (NSString *observer in task.taskObservers) {
+                [dTask addTaskObserverFromOtherTask:observer];
+            }            
         }
+    }
+    
+    /* 建立下载链接 */
+    netWorkTask.userInfo = @{@"task": task,@"taskIdentifier":task.taskUniqueIdentifier};
+    
+    //成功
+    netWorkTask.successBlock = ^(ZYNetWorkTask *task , id response){
         
-        
-        
-        /* 如果有自定义的参数 */
-        if (task.customUrlEncodedParams) {
-            
-            /* 判断自定义参数字符串的第一个字符是不是 & 如果是，那么我们就不用加了，如果不是，那么我们补上 */
-            unichar firstChar = [task.customUrlEncodedParams characterAtIndex:0] ;
-            NSString *firstCharString = [NSString stringWithFormat:@"%c",firstChar];
-            
-            if (![firstCharString isEqualToString:@"&"]) {
-                
-                task.downloadUrl = [NSString stringWithFormat:@"&%@",task.customUrlEncodedParams];
-            }
-        }
-        
-        /* 如果有相同的下载任务就不添加进入队列 */
-        for (GJCFFileDownloadTask *dTask in self.taskArray) {
-            
-            if ([task isEqualToTask:dTask]) {
-                
-                /* 将这个任务的所有观察者添加到存在的任务的观察者中 */
-                for (NSString *observer in task.taskObservers) {
-                    [dTask addTaskObserverFromOtherTask:observer];
-                }
-                
-                return;
-            }
-        }
-        
-        /* 建立下载链接 */
-        NSMutableURLRequest *downloadRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:task.downloadUrl]];
-        AFHTTPRequestOperation *downloadOperation = [[AFHTTPRequestOperation alloc]initWithRequest:downloadRequest];
-        downloadOperation.userInfo = @{@"task": task};
-        
-        NSLog(@"GJCFFileDownloadManager 开始下载 地址:%@",downloadRequest.URL.absoluteString);
-        
-        /* 观察三个任务状态 */
-        [downloadOperation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
-            
-            //        NSLog(@"GJCFFileDownloadManager 下载成功:%@",operation.userInfo);
-            
-            dispatch_async(_gjcfFileDownloadManagerOperationQueue, ^{
-                
-                NSDictionary *userInfo = operation.userInfo;
-                GJCFFileDownloadTask *task = [userInfo objectForKey:@"task"];
-                
-                [self completionWithTask:task resultData:responseObject];
-                
-            });
+        GJCFFileDownloadTask *downloadTask = [task.userInfo objectForKey:@"task"];
 
-            
-        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-            
-            //        NSLog(@"GJCFFileDownloadManager 下载失败 :%@",error);
-            
-            dispatch_async(_gjcfFileDownloadManagerOperationQueue, ^{
-                
-                NSDictionary *userInfo = operation.userInfo;
-                GJCFFileDownloadTask *task = [userInfo objectForKey:@"task"];
-                
-                [self faildWithTask:task faild:error];
+        [self completionWithTask:downloadTask resultData:response];
+        
+    };
+    
+    //失败
+    netWorkTask.faildBlock = ^(ZYNetWorkTask *task , NSError *error){
+      
+        GJCFFileDownloadTask *downloadTask = [task.userInfo objectForKey:@"task"];
+        
+        [self faildWithTask:downloadTask faild:error];
+    };
+    
+    //进度
+    netWorkTask.progressBlock = ^(ZYNetWorkTask *task, CGFloat progress){
+      
+        GJCFFileDownloadTask *downloadTask = [task.userInfo objectForKey:@"task"];
 
-            });
-            
-        }];
-        
-        __weak typeof (downloadOperation) weakOperation = downloadOperation;
-        [downloadOperation setDownloadProgressBlock:^(NSUInteger bytesRead, long long totalBytesRead, long long totalBytesExpectedToRead) {
-            
-            dispatch_async(_gjcfFileDownloadManagerOperationQueue, ^{
-            
-                NSDictionary *userInfo = weakOperation.userInfo;
-                GJCFFileDownloadTask *task = [userInfo objectForKey:@"task"];
-                
-                CGFloat uploadKbSize = totalBytesRead/1024.0f;
-                CGFloat totoalSize = totalBytesExpectedToRead/1024.0f;
-                CGFloat downloadProgreessValue = (uploadKbSize/1024.f)/(totoalSize/1024.f);
-                
-                [self progressWithTask:task progress:downloadProgreessValue];
-                
-            });
-            
-        }];
-        
-        /* 加入队列 */
-        if (self.requestOperationManager) {
-            
-            [self.requestOperationManager.operationQueue addOperation:downloadOperation];
-            task.taskState = GJFileDownloadStateDownloading;
-            [self.taskArray addObject:task];
-        }
-        
-    });
+         [self progressWithTask:downloadTask progress:progress];
+    };
+
+    //进入下载管理
+    [[ZYNetWorkManager shareManager]addTask:netWorkTask];
+    
 }
 
 #pragma mark - 请求的三个状态
@@ -230,9 +149,7 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
 {
     NSArray *taskObservers = task.taskObservers;
     task.taskState = GJFileDownloadStateSuccess;
-    
-    NSLog(@"GJCFFileDownloadManager 找到任务所有观察者:%@ for TaskUrl:%@",taskObservers,task.downloadUrl);
-    
+        
     /* 如果任务设定了存储路径 */
     BOOL cacheState = NO;
     if (downloadData) {
@@ -456,36 +373,25 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
         return;
     }
     
-    dispatch_async(_gjcfFileDownloadManagerOperationQueue, ^{
+    NSInteger taskIndex = [self taskIndexForUniqueIdentifier:taskUniqueIdentifier];
+    if (taskIndex == NSNotFound) {
+        return;
+    }
+    GJCFFileDownloadTask *task = [self.taskArray objectAtIndex:taskIndex];
+    
+    /* 移除任务的所有观察者block */
+    [task.taskObservers enumerateObjectsUsingBlock:^(NSString *observerIdentifier, NSUInteger idx, BOOL *stop) {
         
-        NSInteger taskIndex = [self taskIndexForUniqueIdentifier:taskUniqueIdentifier];
-        if (taskIndex == NSNotFound) {
-            return;
-        }
-        GJCFFileDownloadTask *task = [self.taskArray objectAtIndex:taskIndex];
+        [self clearTaskBlockForObserver:observerIdentifier];
         
-        /* 移除任务的所有观察者block */
-        [task.taskObservers enumerateObjectsUsingBlock:^(NSString *observerIdentifier, NSUInteger idx, BOOL *stop) {
-            
-            [self clearTaskBlockForObserver:observerIdentifier];
-            
-        }];
-        
-        /* 退出任务 */
-        for (AFHTTPRequestOperation *request in self.requestOperationManager.operationQueue.operations) {
-            
-            GJCFFileDownloadTask *destTask = request.userInfo[@"task"];
-            
-            if ([task.taskUniqueIdentifier isEqualToString:destTask.taskUniqueIdentifier]) {
-                
-                [request cancel];
-                
-                [self.taskArray removeObjectAtIndex:taskIndex];
-                break;
-            }
-        }    
-
-    });
+    }];
+    
+    /* 退出任务 */
+    NSDictionary *userInfoValues = @{
+                                     @"taskIdentifier":taskUniqueIdentifier,
+                                     };
+    
+    [[ZYNetWorkManager shareManager] cancelTaskByUserInfoValues:userInfoValues];
     
 }
 
@@ -510,91 +416,12 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
         return;
     }
     
-    dispatch_async(_gjcfFileDownloadManagerOperationQueue, ^{
-        
-        NSArray *groupTaskArray = [self groupTaskByUniqueIdentifier:groupTaskUniqueIdentifier];
-        if (groupTaskArray.count == 0) {
-            return;
-        }
-        
-        for (GJCFFileDownloadTask *task in groupTaskArray) {
-            
-            /* 移除任务的所有观察者block */
-            [task.taskObservers enumerateObjectsUsingBlock:^(NSString *observerIdentifier, NSUInteger idx, BOOL *stop) {
-                
-                [self clearTaskBlockForObserver:observerIdentifier];
-                
-            }];
-            
-            /* 退出任务 */
-            for (AFHTTPRequestOperation *request in self.requestOperationManager.operationQueue.operations) {
-                
-                GJCFFileDownloadTask *destTask = request.userInfo[@"task"];
-                
-                if ([task.taskUniqueIdentifier isEqualToString:destTask.taskUniqueIdentifier]) {
-                    
-                    [request cancel];
-                    
-                    [self.taskArray removeObject:task];
-                    
-                    break;
-                }
-            }
-            
-        }
-        
-    });
-}
-
-- (void)cancelTaskWithCompletion:(NSString *)taskUniqueIdentifier
-{
-    if (GJCFStringIsNull(taskUniqueIdentifier)) {
+    NSArray *groupTaskArray = [self groupTaskByUniqueIdentifier:groupTaskUniqueIdentifier];
+    if (groupTaskArray.count == 0) {
         return;
     }
     
-    dispatch_async(_gjcfFileDownloadManagerOperationQueue, ^{
-        
-        NSInteger taskIndex = [self taskIndexForUniqueIdentifier:taskUniqueIdentifier];
-        if (taskIndex == NSNotFound) {
-            return;
-        }
-        GJCFFileDownloadTask *task = [self.taskArray objectAtIndex:taskIndex];
-        
-        /* 退出任务 */
-        for (AFHTTPRequestOperation *request in self.requestOperationManager.operationQueue.operations) {
-            
-            GJCFFileDownloadTask *destTask = request.userInfo[@"task"];
-            
-            if ([task.taskUniqueIdentifier isEqualToString:destTask.taskUniqueIdentifier]) {
-                
-                [request cancel];
-                
-                break;
-            }
-        }
-        
-        /* 如果任务设定了存储路径 */
-        BOOL cacheState = YES;
-        NSData *downloadData = [NSData dataWithContentsOfFile:task.cachePath];
-        
-        [task.taskObservers enumerateObjectsUsingBlock:^(NSString *observeUniqueIdentifier, NSUInteger idx, BOOL *stop) {
-            
-            NSMutableDictionary *actionDict = [self.taskOberverAction objectForKey:observeUniqueIdentifier];
-            
-            //        NSLog(@"GJCFFileDownloadManager 找到响应任务block:%@",actionDict);
-            
-            if (actionDict) {
-                
-                GJCFFileDownloadManagerCompletionBlock completionBlcok = [actionDict objectForKey:kGJCFFileDownloadManagerCompletionBlockKey];
-                
-                if (completionBlcok) {
-                    
-                    completionBlcok(task,downloadData,cacheState);
-                }
-                
-            }
-            
-        }];
+    for (GJCFFileDownloadTask *task in groupTaskArray) {
         
         /* 移除任务的所有观察者block */
         [task.taskObservers enumerateObjectsUsingBlock:^(NSString *observerIdentifier, NSUInteger idx, BOOL *stop) {
@@ -603,9 +430,63 @@ static dispatch_queue_t _gjcfFileDownloadManagerOperationQueue ;
             
         }];
         
-        [self.taskArray removeObjectAtIndex:taskIndex];
+        //网络组件退出请求
+        [[ZYNetWorkManager shareManager]cancelGroupTask:groupTaskUniqueIdentifier];
+        
+    }
 
-    });
+}
+
+- (void)cancelTaskWithCompletion:(NSString *)taskUniqueIdentifier
+{
+    if (GJCFStringIsNull(taskUniqueIdentifier)) {
+        return;
+    }
+    
+    NSInteger taskIndex = [self taskIndexForUniqueIdentifier:taskUniqueIdentifier];
+    if (taskIndex == NSNotFound) {
+        return;
+    }
+    GJCFFileDownloadTask *task = [self.taskArray objectAtIndex:taskIndex];
+    
+    /* 退出任务 */
+    NSDictionary *userInfoValues = @{
+                                     @"taskIdentifier":taskUniqueIdentifier,
+                                     };
+    
+    [[ZYNetWorkManager shareManager] cancelTaskByUserInfoValues:userInfoValues];
+    
+    /* 如果任务设定了存储路径 */
+    BOOL cacheState = YES;
+    NSData *downloadData = [NSData dataWithContentsOfFile:task.cachePath];
+    
+    [task.taskObservers enumerateObjectsUsingBlock:^(NSString *observeUniqueIdentifier, NSUInteger idx, BOOL *stop) {
+        
+        NSMutableDictionary *actionDict = [self.taskOberverAction objectForKey:observeUniqueIdentifier];
+        
+        //        NSLog(@"GJCFFileDownloadManager 找到响应任务block:%@",actionDict);
+        
+        if (actionDict) {
+            
+            GJCFFileDownloadManagerCompletionBlock completionBlcok = [actionDict objectForKey:kGJCFFileDownloadManagerCompletionBlockKey];
+            
+            if (completionBlcok) {
+                
+                completionBlcok(task,downloadData,cacheState);
+            }
+            
+        }
+        
+    }];
+    
+    /* 移除任务的所有观察者block */
+    [task.taskObservers enumerateObjectsUsingBlock:^(NSString *observerIdentifier, NSUInteger idx, BOOL *stop) {
+        
+        [self clearTaskBlockForObserver:observerIdentifier];
+        
+    }];
+    
+    [self.taskArray removeObjectAtIndex:taskIndex];
     
 }
 

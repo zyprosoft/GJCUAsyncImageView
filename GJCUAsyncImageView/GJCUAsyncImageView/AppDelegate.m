@@ -43,6 +43,10 @@
     
     [self.rootVC addDebugSection:sectionInfo];
     
+    TVGDebugModel *item1 = [TVGDebugModel debugModelWithTitle:@"Simple Demo 2" withClassName:@"DemoImageListViewController"];
+    TVGDebugSectionInfo *sectionInfo1 = [TVGDebugSectionInfo debugSectionInfoWithTitle:@"Simple Demo 2" withTestsArra:@[item1]];
+    
+    [self.rootVC addDebugSection:sectionInfo1];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {

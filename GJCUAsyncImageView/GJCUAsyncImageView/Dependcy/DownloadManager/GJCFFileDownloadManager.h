@@ -23,6 +23,7 @@ typedef void (^GJCFFileDownloadManagerFaildBlock) (GJCFFileDownloadTask *task,NS
 + (GJCFFileDownloadManager *)shareDownloadManager;
 
 
+
 /* 设置下载服务器地址，不是必须的，是为了用来当没有主机地址的时候，可以用来补全 */
 - (void)setDefaultDownloadHost:(NSString *)host;
 

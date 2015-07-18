@@ -103,6 +103,12 @@
 		365FF9DA1B4EC0A7005161D6 /* AFURLResponseSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 365FF9C81B4EC0A7005161D6 /* AFURLResponseSerialization.m */; };
 		365FF9DB1B4EC0A7005161D6 /* AFURLSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 365FF9CA1B4EC0A7005161D6 /* AFURLSessionManager.m */; };
 		365FF9DC1B4EC0A7005161D6 /* AFURLSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 365FF9CA1B4EC0A7005161D6 /* AFURLSessionManager.m */; };
+		36CB73961B5A206E003B4EA1 /* ZYNetWorkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 36CB73931B5A206E003B4EA1 /* ZYNetWorkManager.m */; };
+		36CB73971B5A206E003B4EA1 /* ZYNetWorkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 36CB73931B5A206E003B4EA1 /* ZYNetWorkManager.m */; };
+		36CB73981B5A206E003B4EA1 /* ZYNetWorkTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 36CB73951B5A206E003B4EA1 /* ZYNetWorkTask.m */; };
+		36CB73991B5A206E003B4EA1 /* ZYNetWorkTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 36CB73951B5A206E003B4EA1 /* ZYNetWorkTask.m */; };
+		36CB739C1B5A25AB003B4EA1 /* DemoImageListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36CB739B1B5A25AB003B4EA1 /* DemoImageListViewController.m */; };
+		36CB739D1B5A25AB003B4EA1 /* DemoImageListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36CB739B1B5A25AB003B4EA1 /* DemoImageListViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -226,6 +232,13 @@
 		365FF9C81B4EC0A7005161D6 /* AFURLResponseSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLResponseSerialization.m; sourceTree = "<group>"; };
 		365FF9C91B4EC0A7005161D6 /* AFURLSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLSessionManager.h; sourceTree = "<group>"; };
 		365FF9CA1B4EC0A7005161D6 /* AFURLSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLSessionManager.m; sourceTree = "<group>"; };
+		36CB73911B5A206E003B4EA1 /* ZYNetWorkConst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZYNetWorkConst.h; sourceTree = "<group>"; };
+		36CB73921B5A206E003B4EA1 /* ZYNetWorkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZYNetWorkManager.h; sourceTree = "<group>"; };
+		36CB73931B5A206E003B4EA1 /* ZYNetWorkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZYNetWorkManager.m; sourceTree = "<group>"; };
+		36CB73941B5A206E003B4EA1 /* ZYNetWorkTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZYNetWorkTask.h; sourceTree = "<group>"; };
+		36CB73951B5A206E003B4EA1 /* ZYNetWorkTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZYNetWorkTask.m; sourceTree = "<group>"; };
+		36CB739A1B5A25AB003B4EA1 /* DemoImageListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoImageListViewController.h; sourceTree = "<group>"; };
+		36CB739B1B5A25AB003B4EA1 /* DemoImageListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DemoImageListViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -331,6 +344,7 @@
 		365FF9181B4EBFDB005161D6 /* Dependcy */ = {
 			isa = PBXGroup;
 			children = (
+				36CB73901B5A206E003B4EA1 /* ZYNetWork */,
 				365FF9B71B4EC0A7005161D6 /* AFNetworking */,
 				365FF9191B4EBFDB005161D6 /* DownloadManager */,
 				365FF91E1B4EBFDB005161D6 /* GJCFAssetsPicker */,
@@ -533,6 +547,8 @@
 			children = (
 				365FF9AD1B4EBFF9005161D6 /* GJCUAsyncImageDemoViewController.h */,
 				365FF9AE1B4EBFF9005161D6 /* GJCUAsyncImageDemoViewController.m */,
+				36CB739A1B5A25AB003B4EA1 /* DemoImageListViewController.h */,
+				36CB739B1B5A25AB003B4EA1 /* DemoImageListViewController.m */,
 			);
 			name = Demo;
 			path = GJCUAsyncImageView/Demo;
@@ -562,6 +578,18 @@
 				365FF9CA1B4EC0A7005161D6 /* AFURLSessionManager.m */,
 			);
 			path = AFNetworking;
+			sourceTree = "<group>";
+		};
+		36CB73901B5A206E003B4EA1 /* ZYNetWork */ = {
+			isa = PBXGroup;
+			children = (
+				36CB73911B5A206E003B4EA1 /* ZYNetWorkConst.h */,
+				36CB73921B5A206E003B4EA1 /* ZYNetWorkManager.h */,
+				36CB73931B5A206E003B4EA1 /* ZYNetWorkManager.m */,
+				36CB73941B5A206E003B4EA1 /* ZYNetWorkTask.h */,
+				36CB73951B5A206E003B4EA1 /* ZYNetWorkTask.m */,
+			);
+			path = ZYNetWork;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -666,6 +694,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				365FF9891B4EBFDB005161D6 /* GJCFAssetsPickerCell.m in Sources */,
+				36CB739C1B5A25AB003B4EA1 /* DemoImageListViewController.m in Sources */,
 				365FF98F1B4EBFDB005161D6 /* GJCFAssetsView.m in Sources */,
 				365FF9CB1B4EC0A7005161D6 /* AFHTTPRequestOperation.m in Sources */,
 				365FF9811B4EBFDB005161D6 /* UILabel+GJCFAssetsPickerStyle.m in Sources */,
@@ -691,6 +720,7 @@
 				365FF8F01B4EBF84005161D6 /* AppDelegate.m in Sources */,
 				365FF9CD1B4EC0A7005161D6 /* AFHTTPRequestOperationManager.m in Sources */,
 				365FF97B1B4EBFDB005161D6 /* GJCFAssetsPickerConstans.m in Sources */,
+				36CB73981B5A206E003B4EA1 /* ZYNetWorkTask.m in Sources */,
 				365FF8ED1B4EBF84005161D6 /* main.m in Sources */,
 				365FF96F1B4EBFDB005161D6 /* TVGDebugSectionInfo.m in Sources */,
 				365FF9691B4EBFDB005161D6 /* TVGDebugLogger.m in Sources */,
@@ -703,6 +733,7 @@
 				365FF9A71B4EBFDB005161D6 /* GJCFSystemUitil.m in Sources */,
 				365FF9951B4EBFDB005161D6 /* GJCFAssetsPickerViewController.m in Sources */,
 				365FF9D11B4EC0A7005161D6 /* AFNetworkReachabilityManager.m in Sources */,
+				36CB73961B5A206E003B4EA1 /* ZYNetWorkManager.m in Sources */,
 				365FF99D1B4EBFDB005161D6 /* GJCFDateUitil.m in Sources */,
 				365FF9751B4EBFDB005161D6 /* GJCFFileDownloadTask.m in Sources */,
 				365FF9731B4EBFDB005161D6 /* GJCFFileDownloadManager.m in Sources */,
@@ -723,6 +754,7 @@
 				365FF9941B4EBFDB005161D6 /* GJCFAssetsPickerPreviewItemViewController.m in Sources */,
 				365FF9A81B4EBFDB005161D6 /* GJCFSystemUitil.m in Sources */,
 				365FF99C1B4EBFDB005161D6 /* GJCFCachePathManager.m in Sources */,
+				36CB73991B5A206E003B4EA1 /* ZYNetWorkTask.m in Sources */,
 				365FF98A1B4EBFDB005161D6 /* GJCFAssetsPickerCell.m in Sources */,
 				365FF9861B4EBFDB005161D6 /* GJCFAsset.m in Sources */,
 				365FF9A61B4EBFDB005161D6 /* GJCFStringUitil.m in Sources */,
@@ -739,6 +771,7 @@
 				365FF9011B4EBF84005161D6 /* GJCUAsyncImageViewTests.m in Sources */,
 				365FF9961B4EBFDB005161D6 /* GJCFAssetsPickerViewController.m in Sources */,
 				365FF9761B4EBFDB005161D6 /* GJCFFileDownloadTask.m in Sources */,
+				36CB73971B5A206E003B4EA1 /* ZYNetWorkManager.m in Sources */,
 				365FF9AA1B4EBFDB005161D6 /* UIView+GJCFViewFrameUitil.m in Sources */,
 				365FF99E1B4EBFDB005161D6 /* GJCFDateUitil.m in Sources */,
 				365FF9801B4EBFDB005161D6 /* UIButton+GJCFAssetsPickerStyle.m in Sources */,
@@ -759,6 +792,7 @@
 				365FF96C1B4EBFDB005161D6 /* TVGDebugModel.m in Sources */,
 				365FF99A1B4EBFDB005161D6 /* GJCFPhotosViewController.m in Sources */,
 				365FF9701B4EBFDB005161D6 /* TVGDebugSectionInfo.m in Sources */,
+				36CB739D1B5A25AB003B4EA1 /* DemoImageListViewController.m in Sources */,
 				365FF97C1B4EBFDB005161D6 /* GJCFAssetsPickerConstans.m in Sources */,
 				365FF9841B4EBFDB005161D6 /* GJCFAlbums.m in Sources */,
 				365FF9CE1B4EC0A7005161D6 /* AFHTTPRequestOperationManager.m in Sources */,
@@ -823,7 +857,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -859,7 +893,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -870,6 +904,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer: ZHANPENG CHENG (H5ECH8KQCT)";
 				INFOPLIST_FILE = GJCUAsyncImageView/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -880,6 +915,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer: ZHANPENG CHENG (H5ECH8KQCT)";
 				INFOPLIST_FILE = GJCUAsyncImageView/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -939,6 +975,7 @@
 				365FF9061B4EBF84005161D6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		365FF9071B4EBF84005161D6 /* Build configuration list for PBXNativeTarget "GJCUAsyncImageViewTests" */ = {
 			isa = XCConfigurationList;
@@ -947,6 +984,7 @@
 				365FF9091B4EBF84005161D6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
